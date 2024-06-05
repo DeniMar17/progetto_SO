@@ -1,0 +1,6 @@
+Closed loop motor control.
+   Using an H bridge and a small motor with encoder, implement a closed loop motor control
+   using an arduiono so that the voltage applied to the motor makes the measured velocity
+   matching with the desired one.
+   
+
