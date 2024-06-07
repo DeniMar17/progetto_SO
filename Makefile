@@ -25,13 +25,15 @@ OBJS=uart.o\
      atomport_asm.o\
      timer.o\
      scheduler.o\
+     74HCT595N.o\
 
 HEADERS=uart.h\
         tcb.h.h\
 	tcb_list.h\
 	atomport_asm.h\
 	timer.h\
-        scheduler.h
+        scheduler.h\
+        74HCT595N.h\
 
 BINS= main.elf tcb_queue_test.elf
 

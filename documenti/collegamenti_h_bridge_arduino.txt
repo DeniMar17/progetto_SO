@@ -1,0 +1,11 @@
+Collegamenti pin tra arduino e hbridge
+
+1-2EN (pin 1 di IC1) -> pwm 11 arduino
+1A (pin 2 di IC1) -> QC (pin 2 di 74HCT595N)
+1Y (pin 3 di IC1) -> pin 1 di M1
+2y (pin 6 di IC1) -> pin 2 di M1
+2A (pin 7 di IC1) -> QD (pin 3 di 74HCT595N)
+pin 14 di 74HCT595N -> pin 8 arduino
+pin 11 di 74HCT595N -> pin 4 arduino
+pin 12 di 74HCT595N -> pin 12 arduino
+pin 13 di 74HCT595N -> pin 7 arduino
