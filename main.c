@@ -9,6 +9,7 @@
 #include "uart.h"
 #include "atomport_asm.h"
 #include "scheduler.h"
+#include "74HCT595N.h"
 #define THREAD_STACK_SIZE 256
 #define IDLE_STACK_SIZE 128
 
@@ -41,24 +42,11 @@ void p1_fn(uint32_t arg __attribute__((unused))){
 TCB p2_tcb;
 uint8_t p2_stack[THREAD_STACK_SIZE];
 void p2_fn(uint32_t arg __attribute__((unused))){
-
-// the LED is connected to pin 13
-  // that is the bit 7 of port b
-  const uint8_t mask=(1<<7);
-  // we configure the pin as output
-  DDRB |= mask;
-  int k=0;
-  
   while(1){
     cli();
     printf("p2\n");
     sei();
-    if (k&1)
-      PORTB=mask;
-    else
-      PORTB=0;
-      ++k;
-    _delay_ms(500);
+    _delay_ms(10);
   }
 }
 
@@ -67,6 +55,13 @@ void p2_fn(uint32_t arg __attribute__((unused))){
 int main(void){
   // we need printf for debugging
   printf_init();
+
+init74HCT595N();
+
+while(1){
+//  set74HCT595N(0xff);
+}
+
 
   TCB_create(&idle_tcb,
              idle_stack+IDLE_STACK_SIZE-1,
