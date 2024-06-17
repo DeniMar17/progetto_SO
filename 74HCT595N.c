@@ -3,10 +3,11 @@
 #include <stdint.h>
 #include <avr/io.h>
 #include "74HCT595N.h"
+#include "uart.h"
 
 // definizione bit motore
 #define FORWARD_M1		0x1 << 2
-#define BACKWARDARD_M1  0x2 << 2
+#define BACKWARD_M1  0x2 << 2
 #define RELEASE_M1		0x3 << 2
 
 // definizione dei pin dell'AVR MEGA2560 per pilotare lo shift register 74HCT595
@@ -46,12 +47,10 @@ void init74HCT595N(){
 		// TEST SIMULANDO WIDTH PWM AL 100%
  		DDRB |= Pwm_pin;
 		Output_Pwm_H; 
-		printf("PORTB: %02X\n",PORTB);
+		//printf("PORTB: %02X\n",PORTB);
 
 
-		bitpattern_Motore|=RELEASE_M1;
 		set74HCT595N(bitpattern_Motore);
-
 
 
 }
@@ -79,7 +78,7 @@ void set74HCT595N(unsigned char pattern){
 
 	for (int i=7; i>=0; i--) {  // Invia il pattern di dati verso lo shift register
 		unsigned char val = pattern & (1<<i);   
-		printf("bit: %d %d\n",i,val);
+		//printf("bit: %d %d\n",i,val);
 		if(val!=0){
 			PORTH |= Data_Pin;  
 		} else {
@@ -90,11 +89,47 @@ void set74HCT595N(unsigned char pattern){
 
 	}  // end for
 	Latch_Clk_transizione();  // La transizione BASSO-ALTO del clock aggiorna il buffer di output dello shift register
-printf("PORTB: %02X\n",PORTB);
+	//printf("PORTB: %02X\n",PORTB);
 	Output_Enable_L;   	  // abilita il buffer di output dello shift register
-	printf("PORTB: %02X\n",PORTB);
+	//printf("PORTB: %02X\n",PORTB);
 
 }
+
+// prende in ingresso numero del motore e comando da inviare e setta il bitpattern
+void attivaMotore74HCT595N(unsigned char id_motore, unsigned char comando){
+	
+	switch (id_motore) {
+		case MOTORE_1:
+			switch (comando) {
+				case FORWARD:
+					bitpattern_Motore&= ~RELEASE_M1;
+					bitpattern_Motore|= FORWARD_M1;
+					break;
+				case BACKWARD:
+					bitpattern_Motore&= ~RELEASE_M1;
+					bitpattern_Motore|= BACKWARD_M1;
+					break;
+				case RELEASE:
+					bitpattern_Motore&= ~RELEASE_M1;
+					bitpattern_Motore|= RELEASE_M1;
+					break;
+
+			}
+			break;
+
+		case MOTORE_2:
+			break;
+		case MOTORE_3:
+			break;
+		case MOTORE_4:
+			break;
+
+	}
+	
+	set74HCT595N(bitpattern_Motore);
+}
+
+
 
 
 

@@ -26,6 +26,8 @@ OBJS=uart.o\
      timer.o\
      scheduler.o\
      74HCT595N.o\
+     util.o\
+     gestionecomandi.o\
 
 HEADERS=uart.h\
         tcb.h.h\
@@ -34,6 +36,8 @@ HEADERS=uart.h\
 	timer.h\
         scheduler.h\
         74HCT595N.h\
+        util.h\
+     	gestionecomandi.h\
 
 BINS= main.elf tcb_queue_test.elf
 

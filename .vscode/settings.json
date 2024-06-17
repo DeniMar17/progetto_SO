@@ -1,3 +1,13 @@
 {
-    "ros.distro": "noetic"
+    "files.associations": {
+        "delay.h": "c",
+        "io.h": "c",
+        "interrupt.h": "c",
+        "scheduler.h": "c",
+        "uart.h": "c",
+        "atomport_asm.h": "c",
+        "tcb_list.h": "c",
+        "ctype.h": "c",
+        "stdint.h": "c"
+    }
 }
