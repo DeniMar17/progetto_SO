@@ -44,10 +44,6 @@ void init74HCT595N(){
 
 
 
-		// TEST SIMULANDO WIDTH PWM AL 100%
- 		DDRB |= Pwm_pin;
-		Output_Pwm_H; 
-		//printf("PORTB: %02X\n",PORTB);
 
 
 		set74HCT595N(bitpattern_Motore);
@@ -128,6 +124,30 @@ void attivaMotore74HCT595N(unsigned char id_motore, unsigned char comando){
 	
 	set74HCT595N(bitpattern_Motore);
 }
+
+
+
+void InitPWM(void)
+{
+ 	DDRB |= Pwm_pin;   // PB6 Output
+    TCCR1A = (1 << COM1B1) | (1 << WGM11); // Abilita OC1B (compare match output B)
+    TCCR1B = (1 << WGM13) | (1 << WGM12) | (1 << CS11); // Prescaler = 8 divide la frequenza dell'oscillatore da 16 Mhz per 8
+    ICR1 = 19999; // Imposta il top per una frequenza di 50 Hz
+
+	setPwmDutyCycle(0);
+}
+
+void setPwmDutyCycle(uint8_t duty) {
+    OCR1B = (duty / 100.0) * ICR1; // Usa OCR1B per PB6
+}
+
+
+void setPwm74HCT595N(unsigned char id_motore, unsigned int duty) {
+	setPwmDutyCycle(duty);
+}
+
+//void setRpm74HCT595N() {}
+
 
 
 

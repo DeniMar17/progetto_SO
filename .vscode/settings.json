@@ -9,5 +9,6 @@
         "tcb_list.h": "c",
         "ctype.h": "c",
         "stdint.h": "c"
-    }
+    },
+    "ros.distro": "noetic"
 }

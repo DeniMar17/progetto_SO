@@ -18,3 +18,9 @@ void set74HCT595N(unsigned char pattern);
 // funzione per accendere/spegnere i motori 1 2 3 4 
 void attivaMotore74HCT595N(unsigned char id_motore, unsigned char comando);
 
+// inizializza il pwm
+void InitPWM(void);
+
+// imposta il duty cicle
+void setPwmDutyCycle(uint8_t duty);
+

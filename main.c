@@ -55,7 +55,7 @@ void p2_fn(uint32_t arg __attribute__((unused))){
       buffer[++buffptr]=0x0;
     }
     else {
-      usart_TransmitString(&buffer);
+      //usart_TransmitString(&buffer);
       GestioneComandi(&buffer);
       
       buffptr=0;
@@ -74,7 +74,12 @@ int main(void){
   // inizializzazione della usart 0
   init_USART();
 
-init74HCT595N();
+  init74HCT595N();
+
+  InitPWM();
+
+
+
 
 //while(1){
 //  set74HCT595N(0xff);
