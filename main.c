@@ -13,6 +13,8 @@
 #include "scheduler.h"
 #include "gestionecomandi.h"
 #include "74HCT595N.h"
+#include "timer5.h"
+#include "pid.h"
 #define THREAD_STACK_SIZE 1024
 #define IDLE_STACK_SIZE 128
 
@@ -29,12 +31,13 @@ void idle_fn(uint32_t thread_arg __attribute__((unused))){
   }
 }
 
+
 TCB p1_tcb;
 uint8_t p1_stack[THREAD_STACK_SIZE];
 void p1_fn(uint32_t arg __attribute__((unused))){
+  char printbuffer [256];
   while(1){
-
-    _delay_ms(1000);
+       PID();
   }
 }
 
@@ -68,8 +71,6 @@ void p2_fn(uint32_t arg __attribute__((unused))){
 
 
 
-
-
 int main(void){
   // inizializzazione della usart 0
   init_USART();
@@ -77,6 +78,10 @@ int main(void){
   init74HCT595N();
 
   InitPWM();
+
+  EncoderInterruptInit();
+
+  initTimer5();
 
 
 

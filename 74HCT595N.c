@@ -1,9 +1,12 @@
 #include <util/delay.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
+#include <avr/interrupt.h>
 #include <avr/io.h>
 #include "74HCT595N.h"
 #include "uart.h"
+#include "pid.h"
 
 // definizione bit motore
 #define FORWARD_M1		0x1 << 2
@@ -30,7 +33,7 @@
 
 unsigned char bitpattern_Motore=0x0;
 
-void init74HCT595N(){
+void init74HCT595N() {
 		DDRH |= Enable_Pin | Data_Pin;  //definisce pin 7 e 8 OUTPUT (bit 4 e 5)
 		Output_Enable_L;  //imposta Pin 7 LOW (OE) 
 		PORTH |=  Data_Pin; //mette pin 8 HIGH (bit 5)
@@ -41,10 +44,6 @@ void init74HCT595N(){
 		DDRB |= Latch_Clock_Pin;  //definisce pin 12 OUTPUT (bit 6)		
 		LatchSR_Clk_L;   //mette pin 12 LOW (bit 6)
 		
-
-
-
-
 
 		set74HCT595N(bitpattern_Motore);
 
@@ -127,26 +126,106 @@ void attivaMotore74HCT595N(unsigned char id_motore, unsigned char comando){
 
 
 
+
+
+void setPwmDutyCycle(uint8_t duty) {
+	//char printbuffer [256];
+	
+    //OCR1A = (duty / 100.0) * ICR1; // Usa OCR1A per PB5
+
+	uint32_t val00=ICR1;	
+	uint32_t val0=((uint32_t) duty) * val00;
+	uint32_t val1=( val0 / 100);
+
+	uint8_t low=((uint8_t)val1) & 0x00FF;
+	uint8_t high=(uint8_t)((val1 & 0xFF00) >>8);
+// in scrittura prima H e poi L	
+	OCR1AH = high;
+	OCR1AL = low;
+
+/*
+	sprintf(printbuffer, "\n %lu\n", val00);
+    usart_TransmitString(printbuffer);
+
+	sprintf(printbuffer, "\n %04X\n", (uint16_t)duty);
+    usart_TransmitString(printbuffer);
+
+	sprintf(printbuffer, "\n %04X\n", (uint16_t)val1);
+    usart_TransmitString(printbuffer);
+
+	sprintf(printbuffer, "\n %04X\n", (uint16_t)val0);
+    usart_TransmitString(printbuffer);
+
+	sprintf(printbuffer, "\n %04X\n", (uint8_t)low);
+    usart_TransmitString(printbuffer);
+
+	sprintf(printbuffer, "\n %04X\n", (uint8_t)high);
+    usart_TransmitString(printbuffer);
+*/
+// in lettura prima L e poi H
+	low=OCR1AL;
+	high=OCR1AH;
+
+/*
+
+	sprintf(printbuffer, "\n %04X \n", (uint8_t)low);
+    usart_TransmitString(printbuffer);
+
+	sprintf(printbuffer, "\n %04X \n", (uint8_t)high);
+    usart_TransmitString(printbuffer);
+*/
+
+}
+
+void setPwm74HCT595N(unsigned char id_motore, unsigned int duty) {
+	setPwmDutyCycle(duty);
+}
+
 void InitPWM(void)
 {
- 	DDRB |= Pwm_pin;   // PB6 Output
-    TCCR1A = (1 << COM1B1) | (1 << WGM11); // Abilita OC1B (compare match output B)
+ 	DDRB |= Pwm_pin;   // PB5 Output
+    TCCR1A = (1 << COM1A1) | (1 << COM1A0) | (1 << WGM11); // Abilita OC1B (compare match output B) e inverte il segnale generato in modo che il valore di duty
+														   // cycle corrisponda alla parte alta
+	
     TCCR1B = (1 << WGM13) | (1 << WGM12) | (1 << CS11); // Prescaler = 8 divide la frequenza dell'oscillatore da 16 Mhz per 8
     ICR1 = 19999; // Imposta il top per una frequenza di 50 Hz
 
 	setPwmDutyCycle(0);
 }
 
-void setPwmDutyCycle(uint8_t duty) {
-    OCR1B = (duty / 100.0) * ICR1; // Usa OCR1B per PB6
+void EncoderInterruptInit(void){
+	DDRD &=~(0x03);  //pin 0 e pin 1 PORTD input
+	PORTD|=0x03;   //pin 0 e pin 1 PORTD  pullup	
+	EICRA |=0x03;  // Configuro INT0 per attivare ISR sul fronte di salita (ISC00 e ISC01 messi a 1)
+	EIMSK |= 0x01;  //  Abilito l'interrupt su INT0
+}
+
+unsigned int counter=0;
+// Interrupt Service Routine per INT0
+ISR(INT0_vect) {
+    counter++;
 }
 
 
-void setPwm74HCT595N(unsigned char id_motore, unsigned int duty) {
-	setPwmDutyCycle(duty);
-}
 
-//void setRpm74HCT595N() {}
+void setRpm74HCT595N(unsigned char id_motore, unsigned int rpm_value, unsigned char comando) {
+	switch (comando) {
+				case FORWARD:
+					rpm_attivo=1;
+					num_giri=rpm_value;
+					break;
+				case BACKWARD:
+					rpm_attivo=1;
+					num_giri=rpm_value;
+					break;
+				case RELEASE:
+					rpm_attivo=0;
+					num_giri=0;
+					break;
+
+	}
+	
+}
 
 
 
