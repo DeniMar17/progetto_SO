@@ -16,8 +16,8 @@
 //********************************************************************************
 // Definisco i buffer di trasmissione e ricezione
 //********************************************************************************
-#define RX_BUFFER_SIZE 256     /* deve essere una potenza di 2 */
-#define TX_BUFFER_SIZE 256     /* deve essere una pèotenza di 2 */
+#define RX_BUFFER_SIZE 1024     /* deve essere una potenza di 2 */
+#define TX_BUFFER_SIZE 1024     /* deve essere una pèotenza di 2 */
 #define RX_BUFFER_MASK (RX_BUFFER_SIZE - 1)
 #define TX_BUFFER_MASK (TX_BUFFER_SIZE - 1)
 

@@ -15,6 +15,8 @@
 #include "74HCT595N.h"
 #include "timer5.h"
 #include "pid.h"
+#include "timer4.h"
+
 #define THREAD_STACK_SIZE 1024
 #define IDLE_STACK_SIZE 128
 
@@ -37,7 +39,8 @@ uint8_t p1_stack[THREAD_STACK_SIZE];
 void p1_fn(uint32_t arg __attribute__((unused))){
   char printbuffer [256];
   while(1){
-       PID();
+       //PID();
+       _delay_ms(1000);
   }
 }
 
@@ -60,7 +63,7 @@ void p2_fn(uint32_t arg __attribute__((unused))){
     else {
       //usart_TransmitString(&buffer);
       GestioneComandi(&buffer);
-      
+      memset(buffer,0x0,256);
       buffptr=0;
     }
     
@@ -82,6 +85,7 @@ int main(void){
   EncoderInterruptInit();
 
   initTimer5();
+  initTimer4();
 
 
 

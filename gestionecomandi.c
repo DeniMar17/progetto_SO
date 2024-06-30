@@ -8,20 +8,13 @@
 #include "74HCT595N.h"
 
 
-#define MAX_NUM_CMD_MIO 	10
+#define MAX_NUM_CMD_MIO 	4
 char *helpStr[MAX_NUM_CMD_MIO] =
 	{
-		"'help'                 			(mostra la lista dei comandi possibili)",
-		"'motor num_motore forward'                     			(attiva il motore num_motore muovendolo avanti)",
-		"'motor num_motore backward'                   			(attiva il motore num_motore muovendolo indietro)",
-		"'motor num_motore release'                      			(spegne il motore num_motore)",
-		"'motorpwm num_motore dutycycle forward'                      			(imposta il pwm del motore a dutycycle muovendolo avanti)",
-    "'motorpwm num_motore dutycycle backward'                      			(imposta il pwm del motore a dutycycle muovendolo indietro)",
-    "'motorpwm num_motore dutycycle release'                      			(imposta il pwm del motore a dutycycle e lo spegne)",
-		"'motorrpm num_motore rpmvalue forward'                      			(imposta il rpm del motore a rpmvalue muovendolo avanti)",
-    "'motorrpm num_motore rpmvalue backward'                      			(imposta il rpm del motore a rpmvalue muovendolo indietro)",
-    "'motorrpm num_motore rpmvalue release'                      			(imposta a zero i giri del motore ew disabilita il pid)",
-		
+		"help",
+		"motor 1 [forward/backward/release]",
+		"motorpwm 1 dutycycle [0 .. 100] [forward/backward/release]",
+		"motorrpm 1 rpmvalue [0..400] [forward/backward/release]",	
 	};
 
 
