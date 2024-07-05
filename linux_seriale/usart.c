@@ -68,23 +68,19 @@ void initUart(int baudrate)
                 break;
                 
         }
-	opt.c_lflag &= ~ECHO; //disabilita l'echo
-	opt.c_lflag &= ~ECHOE;
-	opt.c_lflag &= ~ECHONL; //disabilita new-line echo
-        opt.c_cflag &= ~CSIZE; //azzera la dimensione della maschera dei caratteri (clear)
-        opt.c_cflag |= CS8; //imposta il valore per la CSIZE (8 bit)
-        opt.c_cflag |= CLOCAL|CREAD; //disabilita le linee di controllo RTS/CTS e abilita RX
-        opt.c_cflag &= ~PARENB; //disabilita la generazione del controllo di parità
-        opt.c_iflag &= ~INPCK; //disabilita il parity checking
-        opt.c_cflag &= ~CSTOPB; //disabilita i due stop bits
-        
-        //modalità non canonica, imposto tutto a zero
+	opt.c_lflag &= ~ECHO;
+	opt.c_lflag &= ~ECHOE; // Disable erasure
+	opt.c_lflag &= ~ECHONL; // Disable new-line echo
+        opt.c_cflag &= ~CSIZE;
+        opt.c_cflag |= CS8;
+        opt.c_cflag |= CLOCAL|CREAD;
+        opt.c_cflag &= ~PARENB;
+        opt.c_iflag &= ~INPCK;
+        opt.c_cflag &= ~CSTOPB;
         opt.c_cc[VTIME]=0;
         opt.c_cc[VMIN]=0;
-        
-        
-        tcflush(fd,TCIOFLUSH); //pulisce il filedescriptor
-        tcsetattr(fd,TCSANOW,&opt); //imposta le opzoni sulla seriale
+        tcflush(fd,TCIOFLUSH);
+        tcsetattr(fd,TCSANOW,&opt);
 }
 
 //chiude la porta seriale
@@ -98,7 +94,8 @@ void * rx_func(void * argv)
 {
     char rec_buf[1024];
     char *end;
-
+    int step=1;
+    FILE* f =NULL;
     while(exit_flag!=1)
     {
     	int count=0;
@@ -109,7 +106,38 @@ void * rx_func(void * argv)
 	        	count+=nread;
 	        	if((end=strstr(rec_buf,"\n"))!=NULL)
 			{
-			        printf("RX: %s",rec_buf);         
+				printf("RX: %s",rec_buf);    
+				
+				if (strcmp(rec_buf,"START\n")==0) {
+					//creo nuovo file
+					printf("CREO FILE\n");
+					f = fopen("data.dat", "w");
+					if(f==NULL){
+						printf("APERTURA FILE ERRATA");  
+						exit_flag=1;
+					}else{
+						fprintf(f, "0,0,0,0,0.00\n");
+					}
+				} else if(strcmp(rec_buf,"STOP\n")==0) {
+				 
+					//chiudo  file	
+					printf("CHIUDO FILE\n");
+					if(f!=NULL)
+						fclose(f);	
+					step=1;			
+				} else {
+					//aggiungo riga al file	
+					if(f!=NULL){
+						if((end=strstr(rec_buf,"#"))!=NULL){
+							fprintf(f, "%d,%s",step,&rec_buf[1]);										
+							step++;				
+						}
+					}
+				}
+
+			
+			
+			             
 			        count=0;
 			        memset(rec_buf,0x0,sizeof(rec_buf));			
 			}
@@ -129,7 +157,7 @@ void * tx_func(void * argv)
     while(exit_flag!=1) {
     	int count=0;
     	memset(tx_buf,0,sizeof(tx_buf));
-    	//printf("TXBUFF: %s",tx_buf);
+    	printf("TXBUFF: %s",tx_buf);
 	while((ch = getchar()) != '\n')
 	{
 		if(ch=='Q') {
@@ -161,38 +189,32 @@ int main(int argc , char *argv[])
         char file_name[20];
 
         int i;
-        
-        //stampo gli argomenti letti dalla riga di comando
-        printf("argc=%d\n",argc); 
+        printf("argc=%d\n",argc);
         for(i=0;i < argc;++i)
             printf("argv[%d]:=%s\n",i,argv[i]);
 
-	//se gli argomenti sono minori di 3 esco dal programma richiamando l'help
         if(argc<3) {
             help();
             return 0;
         }
-        //stampo il nome della seriale da utilizzare
         memset(file_name,0,sizeof(file_name));
         sprintf(file_name,"%s",argv[1]);
-        printf("Seriale: %s\n",file_name);
+        printf("Seriale is %s\n",file_name);
         
-	//imposto la baudrate
+
         baudrate=atoi(argv[2]);
         
-        //apro e inizializzo la porta seriale
         openUart(file_name);
         initUart(baudrate);
+        
+        //write(fd,"open:uart0 send ......\n",25);
 
-	//creo i thread di ricezione e trasmissione
+
         pthread_create(&RX_pthread,NULL,rx_func,NULL);
         pthread_create(&TX_pthread,NULL,tx_func,NULL);
 
-	//attendo per uscire dal programma la fine dei due thread
         pthread_join(RX_pthread,NULL);
         pthread_join(TX_pthread,NULL);
-        
-        //chiudo la porta seriale
         closeUart();
         return 0;
 }
