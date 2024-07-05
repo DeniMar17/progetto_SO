@@ -21,18 +21,25 @@ void attivaMotore74HCT595N(unsigned char id_motore, unsigned char comando);
 // inizializza il pwm
 void InitPWM(void);
 
+//imposta il valore del pwm  
+void setPwmDutyCycle(uint16_t duty);
+
+//imposta il valore del pwm in percentuale 
+void setPwmDutyCyclePercentuale(uint8_t duty);
+
 // imposta il duty cicle del pwm per il motore specificato
 void setPwm74HCT595N(unsigned char id_motore, unsigned int duty);
 
 // imposta il numero di giri da raggiungere per il motore specificato utilizzando un controllore PID
-void setRpm74HCT595N(unsigned char id_motore, unsigned int rpm_value, unsigned char comando);
+void setRpm74HCT595N(unsigned char id_motore,  int rpm_value, unsigned char comando);
 
 // inizializza l'interrupt relativo all'encoder
 void EncoderInterruptInit(void);
 
 
+
 // variabili globali
-extern unsigned int counter;
+extern volatile unsigned int counter;
 
 
 

@@ -29,7 +29,7 @@ uint8_t idle_stack[IDLE_STACK_SIZE];
 void idle_fn(uint32_t thread_arg __attribute__((unused))){
   while(1) {
 
-    _delay_ms(5000);
+    _delay_ms(1000);
   }
 }
 
@@ -39,8 +39,8 @@ uint8_t p1_stack[THREAD_STACK_SIZE];
 void p1_fn(uint32_t arg __attribute__((unused))){
   char printbuffer [256];
   while(1){
-       //PID();
-       _delay_ms(1000);
+       PID();
+       _delay_ms(50);
   }
 }
 
@@ -84,7 +84,7 @@ int main(void){
 
   EncoderInterruptInit();
 
-  initTimer5();
+  //initTimer5();
   initTimer4();
 
 

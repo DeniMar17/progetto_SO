@@ -31,6 +31,11 @@
 #define Output_Pwm_H				PORTB |= Pwm_pin
 #define Output_Pwm_L				PORTB &= ~Pwm_pin
 
+
+//#define TCCR1A_MASK (1 << COM1A1) | (1 << COM1A0) | (1 << WGM11)
+#define TCCR1A_MASK (1 << COM1A1) |  (1 << WGM11)
+#define TCCR1B_MASK (1 << WGM13) | (1 << WGM12) | (1 << CS11)
+
 unsigned char bitpattern_Motore=0x0;
 
 void init74HCT595N() {
@@ -126,10 +131,33 @@ void attivaMotore74HCT595N(unsigned char id_motore, unsigned char comando){
 
 
 
+void setPwmDutyCycle(uint16_t duty) {
+	
+	if (duty > 39999){
+		duty=39999;
+	}
+
+	if (duty < 0){
+		duty=0;
+	}
+	uint8_t low=((uint8_t)duty) & 0x00FF;
+	uint8_t high=(uint8_t)((duty & 0xFF00) >>8);
+	
+// in scrittura prima H e poi L	
+	OCR1AH = high;
+	OCR1AL = low;
+
+}
+
+void setPwmDutyCyclePercentuale(uint8_t duty) {
+	
+	if (duty > 100){
+		duty=100;
+	}
 
 
-void setPwmDutyCycle(uint8_t duty) {
-	//char printbuffer [256];
+
+	char printbuffer [256];
 	
     //OCR1A = (duty / 100.0) * ICR1; // Usa OCR1A per PB5
 
@@ -139,9 +167,13 @@ void setPwmDutyCycle(uint8_t duty) {
 
 	uint8_t low=((uint8_t)val1) & 0x00FF;
 	uint8_t high=(uint8_t)((val1 & 0xFF00) >>8);
+	
+	//TCCR1A =0;
+
 // in scrittura prima H e poi L	
 	OCR1AH = high;
 	OCR1AL = low;
+	//TCCR1A = TCCR1A_MASK;
 
 /*
 	sprintf(printbuffer, "\n %lu\n", val00);
@@ -162,35 +194,48 @@ void setPwmDutyCycle(uint8_t duty) {
 	sprintf(printbuffer, "\n %04X\n", (uint8_t)high);
     usart_TransmitString(printbuffer);
 */
+
+
 // in lettura prima L e poi H
+
 	low=OCR1AL;
 	high=OCR1AH;
 
-/*
 
-	sprintf(printbuffer, "\n %04X \n", (uint8_t)low);
+
+/*	sprintf(printbuffer, "\n %04X \n", (uint8_t)low);
     usart_TransmitString(printbuffer);
 
 	sprintf(printbuffer, "\n %04X \n", (uint8_t)high);
     usart_TransmitString(printbuffer);
 */
-
 }
 
-void setPwm74HCT595N(unsigned char id_motore, unsigned int duty) {
-	setPwmDutyCycle(duty);
+void setPwm74HCT595N(unsigned char id_motore, unsigned int duty) {	
+	setPwmDutyCyclePercentuale(duty);
 }
+
+
 
 void InitPWM(void)
 {
- 	DDRB |= Pwm_pin;   // PB5 Output
-    TCCR1A = (1 << COM1A1) | (1 << COM1A0) | (1 << WGM11); // Abilita OC1B (compare match output B) e inverte il segnale generato in modo che il valore di duty
-														   // cycle corrisponda alla parte alta
-	
-    TCCR1B = (1 << WGM13) | (1 << WGM12) | (1 << CS11); // Prescaler = 8 divide la frequenza dell'oscillatore da 16 Mhz per 8
-    ICR1 = 19999; // Imposta il top per una frequenza di 50 Hz
+	char printbuffer [256];
+	sprintf(printbuffer, "\n %04X\n", (uint8_t)TCCR1A);
+    usart_TransmitString(printbuffer);
 
-	setPwmDutyCycle(0);
+	sprintf(printbuffer, "\n %04X\n", (uint8_t)TCCR1B);
+    usart_TransmitString(printbuffer);
+
+ 	DDRB |= Pwm_pin;   // PB5 Output
+    TCCR1A = TCCR1A_MASK; // Abilita OC1B (compare match output B) e inverte il segnale generato in modo che il valore di duty
+						 // cycle corrisponda alla parte alta
+	
+    TCCR1B = TCCR1B_MASK; // Prescaler = 8 divide la frequenza dell'oscillatore da 16 Mhz per 8
+    //ICR1 = 19999; // Imposta il top per una frequenza di 50 Hz
+	ICR1 = 39999; // Imposta il top per una frequenza di 50 Hz
+	//
+	setPwmDutyCyclePercentuale(0);
+	
 }
 
 void EncoderInterruptInit(void){
@@ -200,27 +245,35 @@ void EncoderInterruptInit(void){
 	EIMSK |= 0x01;  //  Abilito l'interrupt su INT0
 }
 
-unsigned int counter=0;
+volatile unsigned int counter=0;
 // Interrupt Service Routine per INT0
 ISR(INT0_vect) {
     counter++;
 }
 
 
-
-void setRpm74HCT595N(unsigned char id_motore, unsigned int rpm_value, unsigned char comando) {
+// imposta la variabile globale con il numero di giri desiderati, abilita la task del pid, impoosta la direzione del motore
+void setRpm74HCT595N(unsigned char id_motore,  int rpm_value, unsigned char comando) {
+	attivaMotore74HCT595N( id_motore,  comando);
+	
 	switch (comando) {
 				case FORWARD:
+					
+					num_giri_desiderati=rpm_value;
 					rpm_attivo=1;
-					num_giri=rpm_value;
+					start=1;
 					break;
 				case BACKWARD:
+					
+					num_giri_desiderati=rpm_value;
 					rpm_attivo=1;
-					num_giri=rpm_value;
+					start=1;
 					break;
 				case RELEASE:
+					
+					num_giri_desiderati=0;
 					rpm_attivo=0;
-					num_giri=0;
+					start=0;
 					break;
 
 	}

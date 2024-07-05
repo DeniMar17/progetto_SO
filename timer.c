@@ -16,22 +16,22 @@ void timerStart ( void )
      * with a prescaler of 256. We will get a compare match 1A
      * interrupt on every system tick, in which we must call the
      * OS's system tick handler. */
-    OCR1A = (AVR_CPU_HZ / 256 / SYSTEM_TICKS_PER_SEC);
+    OCR3A = (AVR_CPU_HZ / 256 / SYSTEM_TICKS_PER_SEC);
 
     /* Enable compare match 1A interrupt */
 #ifdef TIMSK
-    TIMSK = _BV(OCIE1A);
+    TIMSK = _BV(OCIE3A);
 #else
-    TIMSK1 = _BV(OCIE1A);
+    TIMSK3 = _BV(OCIE3A);
 #endif
 
     /* Set prescaler 256 */
-    TCCR1B = _BV(CS12) | _BV(WGM12);
+    TCCR3B = _BV(CS32) | _BV(WGM32);
 }
 
 
 // timer interrupt
-ISR (TIMER1_COMPA_vect)
+ISR (TIMER3_COMPA_vect)
 {
     schedule();
 }

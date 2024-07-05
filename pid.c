@@ -5,12 +5,25 @@
 #include <avr/io.h>
 #include "74HCT595N.h"
 #include "uart.h"
+#include "pid.h"
+#include "timer4.h"
+#include <float.h>
+#include "util.h"
 
-unsigned int num_giri=0;
+int num_giri_desiderati=0;
 unsigned char rpm_attivo=0;
+uint8_t  dutyCycle=0;
 
+float Iout=0.0;
+float Iout_1=0.0;
+float Pout=0.0;
+float Dout=0.0;
+float e_1=0.0;
+
+int start=0;
 void PID(void){
     char printbuffer [256];
+    char floatbuffer[20];
 
     long t_precedente = 0;
     int pos_precedente = 0;
@@ -18,47 +31,53 @@ void PID(void){
     long t_precedente_i = 0;
     int pos_i = 0;
     float velocita_i = 0;
-    
 
     //1 giro motore 12
     //1 giro ruota 170
     if(rpm_attivo){
-        // pid
-        /*
-        sprintf(printbuffer, "sto nel pid \n");
-        usart_TransmitString(printbuffer);
 
-        int pos = 0;
-        float velocita = 0;
-        pos = pos_i; // pos_i è il conteggio dell'interrupt
-        float eintegral = 0;
+        if(start){
+            start=0;
+            sprintf(printbuffer, "START\n");
+            usart_TransmitString(printbuffer); 
+        }
 
-        uint32_t t = restituisciMicrosecondi();
-        float deltaT = ((float) (t-t_precedente))/1.0e6;
-        float velocita = (pos - pos_precedente)/deltaT;
-        pos_precedente = pos;
-        t_precedente = t;
+        //pid
+        int u=num_giri_desiderati;  //ingresso (valore desiderato)
+        float Kp=5; //proporzionale
+        float T=0.2;
+        float Ti=0.5; 
+        float Td=0.3;
+        //float Ki=Kp*(T/Ti); //integrale
+        float Ki=3.0;
+        //float Kd=Kp*(Td/T); //derivativo
+        float Kd=1.0; //derivativo
+        float y=rpmgear; //uscita
 
-        // Convert count/s to RPM
-        float v = velocita/170.0*60.0;
 
-        float v_des = num_giri*100; //target
+        float e=u-y; //calcolo dell'errore
+        Iout=Ki*e+Iout_1;
+        Pout=Kp*e;
+        Dout=Kd*(e-e_1);
+        unsigned int uk=Pout+Iout+Dout;
 
-        float kp = 5;
-        float ki = 10;
-        float e = v_des-v;
-        eintegral = eintegral + e*deltaT;
-  
-        float u = kp*e + ki*eintegral;
-*/
-        _delay_ms(1);
+
+        FloatToStringNew(&floatbuffer, e, 2);
+	    sprintf(printbuffer, "#%u,%u,%u,%s\n", uk ,num_giri_desiderati,rpmgear,floatbuffer);
+        usart_TransmitString(printbuffer); 
+
+        setPwmDutyCycle(uk);  
+
+        Iout_1=Iout;
+        e_1=e;
+
+        
 
     }else{
+        start=0;
         unsigned int count=counter;
-        sprintf(printbuffer, "cnt: %u \n",count);
+        sprintf(printbuffer, "STOP\n");
         usart_TransmitString(printbuffer); 
-        //sprintf(printbuffer, "pid wait\n");
-        //usart_TransmitString(printbuffer);
         _delay_ms(1000);
     }
 }

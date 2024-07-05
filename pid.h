@@ -2,5 +2,6 @@
 
 void PID(void);
 
-extern unsigned int num_giri;
+extern  int num_giri_desiderati;
 extern unsigned char rpm_attivo;
+extern int start;

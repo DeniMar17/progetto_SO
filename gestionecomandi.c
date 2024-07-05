@@ -17,7 +17,7 @@ char *helpStr[MAX_NUM_CMD_MIO] =
 		"motorrpm 1 rpmvalue [0..400] [forward/backward/release]",	
 	};
 
-
+int rpm_value=0;
 
 // prende in ingresso un buffer da analizzare attraverso token e in base al tipo di comando apre la lista di comandi possibili 
 // o passa i parametri alla funzione che attiva il motore
@@ -27,23 +27,23 @@ void GestioneComandi(char *buffer){
   char* rest;
   char* token=strtok_r(buffer, " ", &rest);
   toLower(token);
-  usart_TransmitString(token);
+  //usart_TransmitString(token);
   if(strcmp(token,"help")==0){
       //stampa su terminale i comandi possibili
-        sprintf(printbuffer, "Lista comandi:\n");
+      sprintf(printbuffer, "Lista comandi:\n");
 	    usart_TransmitString(printbuffer);
 		for(int i=0;i<MAX_NUM_CMD_MIO;i++)
 		{			
-            sprintf(printbuffer, "%s\n",helpStr[i]);
+          sprintf(printbuffer, "%s\n",helpStr[i]);
 	        usart_TransmitString(printbuffer);
 
 		}
 		sprintf(printbuffer, "Fine Lista\n");
 	    usart_TransmitString(printbuffer);
 
-  } else if(strcmp(token,"motor")==0) {      
+  } else if(strcmp(token,"motor")==0) {     
+
       token = strtok_r(NULL, " ", &rest);
-      usart_TransmitString(token);
 
       if(isStringNumeric(token)){
         int num_motore=atoi(token);
@@ -51,7 +51,6 @@ void GestioneComandi(char *buffer){
         token = strtok_r(NULL, " ", &rest);
         toLower(token);
         if(strcmp(token,"forward")==0){
-          usart_TransmitString(token);
           attivaMotore74HCT595N(num_motore, FORWARD);
         }
         else if(strcmp(token,"backward")==0){
@@ -68,16 +67,15 @@ void GestioneComandi(char *buffer){
         usart_TransmitString(printbuffer);
       }    
 
-  } else if(strcmp(token,"motorpwm")==0) {      
+  } else if(strcmp(token,"motorpwm")==0) {    
+
       token = strtok_r(NULL, " ", &rest);
-      usart_TransmitString(token);
 
       if(isStringNumeric(token)){
         int num_motore=atoi(token);
 
         token = strtok_r(NULL, " ", &rest);
         if(isStringNumeric(token)){
-          usart_TransmitString(token);
           unsigned short pwm_duty=atoi(token);
 
           // imposta il pwm value
@@ -113,20 +111,17 @@ void GestioneComandi(char *buffer){
 
   } else if(strcmp(token,"motorrpm")==0) {      
       token = strtok_r(NULL, " ", &rest);
-      usart_TransmitString(token);
 
       if(isStringNumeric(token)){
         int num_motore=atoi(token);
 
         token = strtok_r(NULL, " ", &rest);
         if(isStringNumeric(token)){
-          usart_TransmitString(token);
-          int rpm_value=atoi(token);
+          rpm_value=atoi(token);
 
           token = strtok_r(NULL, " ", &rest);
           if(strcmp(token,"forward")==0){
             // imposta rpm value
-            usart_TransmitString(token);
             setRpm74HCT595N(num_motore, rpm_value, FORWARD);
           }
           else if(strcmp(token,"backward")==0){

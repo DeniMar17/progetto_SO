@@ -12,17 +12,19 @@
 
 // ISR per il Timer/Counter 4 in modalità Compare Match
 unsigned int oldval=0;
+volatile unsigned int rpm=0;
+volatile unsigned int rpmgear=0;;
 
 ISR(TIMER4_COMPA_vect) {
     char printbuffer [256];
     unsigned int conv=60/12;
     
     unsigned int delta=counter-oldval;
-    unsigned int rpm=delta*conv;
-    unsigned int rpmgear=rpm/GEAR;
-    sprintf(printbuffer, "conv: %u cnt: %u rpm: %u rpm gear: %u\n", conv, delta, rpm, rpmgear);
+    rpm=delta*conv;
+    rpmgear=rpm/GEAR;
+    //sprintf(printbuffer, "conv: %u cnt: %u rpm: %u rpm gear: %u\n", conv, delta, rpm, rpmgear);
     oldval=counter;
-    usart_TransmitString(printbuffer);
+    //usart_TransmitString(printbuffer);
     
 }
 
