@@ -70,7 +70,7 @@ ISR(USART0_UDRE_vect)
 {
  unsigned char tmpPtrCoda;
 
- /* Controlla se tutti i dati sono stati trasmessi */
+ /* Controlla se ci sono dei dati da trasmettere */
  if (TxPtrTesta != TxPtrCoda) {
   /* Calcola l'indice del buffer */
   tmpPtrCoda = (TxPtrCoda + 1) & TX_BUFFER_MASK;
@@ -116,7 +116,7 @@ void usart_TransmitByte(unsigned char data)
     /* Salva il nuovo indice */
     TxPtrTesta = tmpPtrTesta;               
     /* Abilita l'interrupt UDRE */
-    UCSR0B |= (_BV(UDRIE0));                    
+    UCSR0B |= (_BV(UDRIE0));           //parte isr di trasmissione         
 }
 
 void usart_TransmitString(char *ptrStr)

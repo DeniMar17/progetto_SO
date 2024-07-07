@@ -1,0 +1,19 @@
+##########
+sudo su --> nei terminali in cui apro usart e gnuplot
+gnuplot -p gnuplotprg1
+./usart /dev/ttyUSB0 19200
+##########
+
+motorrpm 1 440 forward
+motorrpm 1 400 forward
+motorrpm 1 300 forward
+motorrpm 1 200 forward
+motorrpm 1 100 forward
+
+motorrpm 1 440 backward
+motorrpm 1 400 backward
+motorrpm 1 300 backward
+motorrpm 1 200 backward
+motorrpm 1 100 backward
+
+motorrpm 1 0 release

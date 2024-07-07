@@ -130,7 +130,7 @@ void attivaMotore74HCT595N(unsigned char id_motore, unsigned char comando){
 }
 
 
-
+//imposta il duty cicle del pwm controllando i limiti superiore e inferiore
 void setPwmDutyCycle(uint16_t duty) {
 	
 	if (duty > 39999){
@@ -140,6 +140,7 @@ void setPwmDutyCycle(uint16_t duty) {
 	if (duty < 0){
 		duty=0;
 	}
+
 	uint8_t low=((uint8_t)duty) & 0x00FF;
 	uint8_t high=(uint8_t)((duty & 0xFF00) >>8);
 	
@@ -149,6 +150,7 @@ void setPwmDutyCycle(uint16_t duty) {
 
 }
 
+//imposta il pwm in modalità percentuale (percentuale dei 39999)
 void setPwmDutyCyclePercentuale(uint8_t duty) {
 	
 	if (duty > 100){
@@ -156,10 +158,8 @@ void setPwmDutyCyclePercentuale(uint8_t duty) {
 	}
 
 
-
 	char printbuffer [256];
 	
-    //OCR1A = (duty / 100.0) * ICR1; // Usa OCR1A per PB5
 
 	uint32_t val00=ICR1;	
 	uint32_t val0=((uint32_t) duty) * val00;
@@ -231,13 +231,13 @@ void InitPWM(void)
 						 // cycle corrisponda alla parte alta
 	
     TCCR1B = TCCR1B_MASK; // Prescaler = 8 divide la frequenza dell'oscillatore da 16 Mhz per 8
-    //ICR1 = 19999; // Imposta il top per una frequenza di 50 Hz
 	ICR1 = 39999; // Imposta il top per una frequenza di 50 Hz
-	//
+	
 	setPwmDutyCyclePercentuale(0);
 	
 }
 
+//inizializzazione per leggere gli interrupt dell'encoder
 void EncoderInterruptInit(void){
 	DDRD &=~(0x03);  //pin 0 e pin 1 PORTD input
 	PORTD|=0x03;   //pin 0 e pin 1 PORTD  pullup	

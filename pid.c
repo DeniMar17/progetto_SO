@@ -25,12 +25,6 @@ void PID(void){
     char printbuffer [256];
     char floatbuffer[20];
 
-    long t_precedente = 0;
-    int pos_precedente = 0;
-
-    long t_precedente_i = 0;
-    int pos_i = 0;
-    float velocita_i = 0;
 
     //1 giro motore 12
     //1 giro ruota 170
