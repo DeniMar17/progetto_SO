@@ -40,7 +40,7 @@ void p1_fn(uint32_t arg __attribute__((unused))){
   char printbuffer [256];
   while(1){
        PID();
-       _delay_ms(50);
+       _delay_ms(100);
   }
 }
 

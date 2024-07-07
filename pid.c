@@ -44,12 +44,12 @@ void PID(void){
 
         //pid
         int u=num_giri_desiderati;  //ingresso (valore desiderato)
-        float Kp=5; //proporzionale
+        float Kp=6.0; //proporzionale
         float T=0.2;
         float Ti=0.5; 
         float Td=0.3;
         //float Ki=Kp*(T/Ti); //integrale
-        float Ki=3.0;
+        float Ki=7.0;
         //float Kd=Kp*(Td/T); //derivativo
         float Kd=1.0; //derivativo
         float y=rpmgear; //uscita
