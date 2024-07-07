@@ -17,7 +17,7 @@ volatile unsigned int rpmgear=0;;
 
 ISR(TIMER4_COMPA_vect) {
     char printbuffer [256];
-    unsigned int conv=60/12;
+    unsigned int conv=60/12; // conv = 60 secondi in 1 min/ 12 tick per giro
     
     unsigned int delta=counter-oldval;
     rpm=delta*conv * 10;   //moltiplico per un fattore 10 in quanto la isr viene chiamate ogni 100 mS
